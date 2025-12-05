@@ -2,19 +2,25 @@
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_AHTX0.h>
+#include "secrets.h"
 #include <WiFi.h>
 #include <WebServer.h>
-#include "secrets.h"
+#include <WiFiUdp.h>
+#include <NTPClient.h>
 
 const char *ssid = WIFI_SSID;
 const char *password = WIFI_PASS;
-
-WebServer server(80);
 
 float currentTemp = 0.0;
 float currentHum = 0.0;
 
 Adafruit_AHTX0 aht;
+
+WebServer server(80);
+
+WiFiUDP ntpUDP;
+// UTC+8 (Singapore) offset = 8 * 3600 seconds
+NTPClient timeClient(ntpUDP, "pool.ntp.org", 8 * 3600, 60000); 
 
 String buildHtmlPage()
 {
@@ -31,8 +37,10 @@ String buildHtmlPage()
         "</head><body><div class='card'>"
         "<h1>Room Environment</h1>";
 
-    html += "<div class='temp'>" + String(currentTemp, 2) + " &deg;C</div>";
-    html += "<div class='hum'>" + String(currentHum, 1) + " % RH</div>";
+    html += "<div class='time'>" "Time: " + timeClient.getFormattedTime() + " SGT</div>";
+    html += "<br>";
+    html += "<div class='temp'>" + String(currentTemp, 2) + "&deg;C</div>";
+    html += "<div class='hum'>" + String(currentHum, 1) + "% RH</div>";
     html += "<p>Auto-refreshing every 5 seconds.</p>";
     html += "</div></body></html>";
 
@@ -64,6 +72,16 @@ void setup()
     Serial.print("Connected! IP address: ");
     Serial.println(WiFi.localIP());
 
+    // --- NTP Client for time recording ---
+    timeClient.begin();
+    Serial.println("Syncing NTP time...");
+    while (!timeClient.update())
+    {
+        timeClient.forceUpdate();
+    }
+    Serial.print("Current time: ");
+    Serial.println(timeClient.getFormattedTime());
+
     // --- I2C + Sensor ---
     Wire.begin(21, 22);
     if (!aht.begin())
@@ -85,9 +103,8 @@ void loop()
     static unsigned long lastRead = 0;
     unsigned long now = millis();
 
-    // Update sensor every 2 seconds
-    if (now - lastRead > 2000)
-    {
+    // Update sensor every 5 seconds
+    if (now - lastRead > 5000) {
         lastRead = now;
 
         sensors_event_t humidity, temp;
@@ -96,11 +113,16 @@ void loop()
         currentTemp = temp.temperature;
         currentHum = humidity.relative_humidity;
 
-        Serial.print("Temp: ");
+        timeClient.update();
+
+        String timestamp = timeClient.getFormattedTime();
+
+        Serial.print(timestamp);
+        Serial.print(" | Temp: ");
         Serial.print(currentTemp);
-        Serial.print(" °C | Humidity: ");
+        Serial.print("°C | Humidity: ");
         Serial.print(currentHum);
-        Serial.println(" %");
+        Serial.println("%");
     }
 
     // Handle incoming HTTP requests
