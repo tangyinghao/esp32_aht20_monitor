@@ -7,6 +7,7 @@
 #include <WebServer.h>
 #include <WiFiUdp.h>
 #include <NTPClient.h>
+#include <time.h>
 
 const char *ssid = WIFI_SSID;
 const char *password = WIFI_PASS;
@@ -96,6 +97,8 @@ void setup()
     server.on("/", handleRoot);
     server.begin();
     Serial.println("HTTP server started.");
+    // CSV header for recordings (timestamp,temp_C,humidity_RH)
+    Serial.println("timestamp,temp_C,humidity_RH");
 }
 
 void loop()
@@ -115,14 +118,19 @@ void loop()
 
         timeClient.update();
 
-        String timestamp = timeClient.getFormattedTime();
+        // Print CSV formatted line with full date+time (YYYY-MM-DD HH:MM:SS,temp,hum)
+        unsigned long epoch = timeClient.getEpochTime();
+        time_t rawTime = (time_t)epoch;
+        struct tm *ptm = gmtime(&rawTime); // epoch already adjusted with timeClient offset
+        char timeBuf[20];
+        strftime(timeBuf, sizeof(timeBuf), "%Y-%m-%d %H:%M:%S", ptm);
+        String fullstamp = String(timeBuf);
 
-        Serial.print(timestamp);
-        Serial.print(" | Temp: ");
-        Serial.print(currentTemp);
-        Serial.print("°C | Humidity: ");
-        Serial.print(currentHum);
-        Serial.println("%");
+        Serial.print(fullstamp);
+        Serial.print(",");
+        Serial.print(currentTemp, 2);
+        Serial.print(",");
+        Serial.println(currentHum, 1);
     }
 
     // Handle incoming HTTP requests
