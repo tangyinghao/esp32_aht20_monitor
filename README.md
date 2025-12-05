@@ -44,8 +44,9 @@ Install the **PlatformIO IDE extension** inside VS Code
 ```bash
 git clone https://github.com/tangyinghao/esp32_aht20_monitor.git
 cd esp32_aht20_monitor
+```
 
-### 3. Add your WiFi credentials (`secrets.h`)
+### 3. Add your WiFi credentials
 
 Create the file:
 
