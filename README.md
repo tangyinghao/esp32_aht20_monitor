@@ -74,8 +74,20 @@ Note: Some ESP32 boards require holding the BOOT button on it during upload. Rel
 
 ### 5. Open the Serial Monitor
 
+You can capture the serial output into a CSV file so you can open it in Excel or import it into analysis tools. The firmware prints a CSV header on boot, with CSV reading rows like timestamp,temp_C,humidity_RH.
+
+Run the code from your project folder and save the output to `readings.csv` using this bash command:
+
 ```bash
-pio device monitor -b 115200
+pio device monitor -b 115200 | tee readings.csv
+```
+
+Note: If you append across reboots you may see repeated headers — delete `readings.csv` before a fresh run if you want a single header.
+
+To view the last lines while capture is running:
+
+```bash
+tail -n 20 readings.csv
 ```
 
 When you want to want to refresh the board, press the EN/RESET button on your ESP32.
@@ -105,30 +117,7 @@ IP address: 192.168.x.x
 Hold ctrl and click to open this URL in any browser on the **same WiFi network**.
 You will see a simple dashboard showing temperature & humidity, auto-refreshing every few seconds.
 
-### 7. Recording readings to CSV
-
-You can capture the serial output into a CSV file so you can open it in Excel or import it into analysis tools. The firmware prints a CSV header on boot, with CSV reading rows like timestamp,temp_C,humidity_RH:
-
-```
-2025-12-06 06:01:44,26.07,52.3
-```
-
-Run the code from your project folder and save the output to `readings.csv` using this bash command.
-
-```bash
-rm -f readings.csv
-pio device monitor -b 115200 | tee readings.csv
-```
-
-Note: If you append across reboots you may see repeated headers — delete `readings.csv` before a fresh run if you want a single header.
-
-To view the last lines while capture is running:
-
-```bash
-tail -n 20 readings.csv
-```
-
-## 📊 Plotting readings with Python
+### 7. Plotting readings with Python
 
 To visualize your temperature and humidity data, use the included `plot_readings.py` script. This creates a two-panel graph showing temperature and humidity over time.
 
