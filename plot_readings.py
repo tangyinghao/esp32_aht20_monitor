@@ -56,18 +56,16 @@ def plot_readings(csv_file='readings.csv'):
         
         plt.tight_layout()
         
-        # Save figure with same name as CSV but with _plot.png extension
+        # Save figure
         output_file = csv_file.replace('.csv', '_plot.png')
         plt.savefig(output_file, dpi=100, bbox_inches='tight')
         print(f"✅ Plot saved to {output_file}")
-        print(f"   Temperature range: {df['temp_C'].min():.2f}°C to {df['temp_C'].max():.2f}°C (avg: {df['temp_C'].mean():.2f}°C)")
-        print(f"   Humidity range: {df['humidity_RH'].min():.1f}% to {df['humidity_RH'].max():.1f}% (avg: {df['humidity_RH'].mean():.1f}%)")
         
         # Show plot
         plt.show()
         
     except FileNotFoundError:
-        print(f"Error: {csv_file} not found. Make sure to name your CSV file like: readings_YYYY-MM-DD.csv")
+        print(f"Error: {csv_file} not found.")
         sys.exit(1)
     except pd.errors.EmptyDataError:
         print(f"Error: {csv_file} is empty or invalid format.")
