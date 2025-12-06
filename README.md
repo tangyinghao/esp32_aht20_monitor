@@ -107,10 +107,9 @@ You will see a simple dashboard showing temperature & humidity, auto-refreshing 
 
 ### 7. Recording readings to CSV
 
-You can capture the serial output into a CSV file so you can open it in Excel or import it into analysis tools. The firmware prints a CSV header on boot, with CSV reading rows like:
+You can capture the serial output into a CSV file so you can open it in Excel or import it into analysis tools. The firmware prints a CSV header on boot, with CSV reading rows like timestamp,temp_C,humidity_RH:
 
 ```
-timestamp,temp_C,humidity_RH
 2025-12-06 06:01:44,26.07,52.3
 ```
 
@@ -126,8 +125,25 @@ Note: If you append across reboots you may see repeated headers — delete `read
 To view the last lines while capture is running:
 
 ```bash
-tail -n 20 readings.csv`
+tail -n 20 readings.csv
+```
+
+## 📊 Plotting readings with Python
+
+To visualize your temperature and humidity data, use the included `plot_readings.py` script. This creates a two-panel graph showing temperature and humidity over time.
+
+**Requirements:**
+```bash
+pip install pandas matplotlib
+```
+
+**Usage:**
+
+Run from your project folder:
+```bash
+python plot_readings.py readings.csv
 ```
 
 ### Happy Recording!
+
 ---

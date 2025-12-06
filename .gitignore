@@ -4,3 +4,7 @@
 .vscode/launch.json
 .vscode/ipch
 include/secrets.h
+
+# CSV readings and generated plots (data/outputs, not source code)
+readings*.csv
+*_plot.png
